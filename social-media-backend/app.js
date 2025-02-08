@@ -17,7 +17,7 @@ app.get('/posts', (req, res) => {
 });
 
 // Optionally, add an endpoint to create a new post
-app.post('/posts', (req, res) => {
+app.post('/posts', (req, res) = > {
     const { userId, content } = req.body;
     if (!userId || !content) {
         return res.status(400).json({ error: 'userId and content are required' });
