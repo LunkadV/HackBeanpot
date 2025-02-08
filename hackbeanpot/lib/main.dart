@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hackbeanpot/pages/create_trip_page.dart';
+import 'package:hackbeanpot/pages/home_page.dart';
+import 'package:hackbeanpot/pages/profile_page.dart';
 import 'Pages/auth_page.dart';
 import 'firebase_options.dart';
 
@@ -18,7 +21,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthPage(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.grey[100],
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthPage(),
+        '/home': (context) => const HomePage(),
+        '/profile': (context) => const ProfilePage(),
+        '/create_trip': (context) => const CreateTripPage(),
+      },
     );
   }
 }
