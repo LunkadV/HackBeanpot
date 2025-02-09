@@ -1,8 +1,8 @@
 // home_page.dart
 import 'package:flutter/material.dart';
 import 'package:hackbeanpot/models/trip.dart';
+import 'package:hackbeanpot/pages/spotify_remix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'trip_details_page.dart';
 import 'profile_page.dart';
 import 'dart:convert';
 
@@ -26,42 +26,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadTrips() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? tripsJson = prefs.getString(_storageKey);
-
-    if (tripsJson != null) {
-      final List<dynamic> decodedTrips = jsonDecode(tripsJson);
+    final tripsString = prefs.getString(_storageKey);
+    if (tripsString != null) {
+      final List<dynamic> tripsJson = jsonDecode(tripsString);
       setState(() {
-        _trips =
-            decodedTrips.map((tripJson) => Trip.fromJson(tripJson)).toList();
+        _trips = tripsJson.map((json) => Trip.fromJson(json)).toList();
       });
-    }
-  }
-
-  Future<void> _saveTrips() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String tripsJson = jsonEncode(_trips.map((t) => t.toJson()).toList());
-    await prefs.setString(_storageKey, tripsJson);
-  }
-
-  void _navigateToCreateTrip() async {
-    final result = await Navigator.pushNamed(context, '/create_trip');
-
-    if (result != null && result is Map<String, dynamic>) {
-      final newTrip = Trip(
-        startLocation: result['start'] as String,
-        endLocation: result['end'] as String,
-        startDate: DateTime.now(),
-        endDate: DateTime.now().add(const Duration(days: 7)),
-      );
-
-      setState(() {
-        _trips.add(newTrip);
-      });
-
-      await _saveTrips();
-
-      // Force rebuild to show new trip
-      setState(() {});
     }
   }
 
@@ -84,6 +54,7 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         children: [
           _buildMainContent(),
+          RoadtripRemixPage(), // Add the music page
           const ProfilePage(),
         ],
       ),
@@ -95,6 +66,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Trips',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.music_note), // Add music icon
+            label: 'Music',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -128,28 +103,18 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Hello, Freaky Pai',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Welcome to TripGlide',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-              ),
-            ],
+          const Text(
+            'My Trips',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           IconButton(
-            onPressed: _navigateToCreateTrip,
-            icon: const Icon(Icons.add_circle, color: Colors.blue, size: 28),
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/create_trip');
+            },
           ),
         ],
       ),
@@ -271,7 +236,6 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Add Hero widget here
                         Hero(
                           tag: heroTag,
                           child: Text(

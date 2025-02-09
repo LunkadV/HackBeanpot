@@ -135,15 +135,6 @@ class _CreateTripPageState extends State<CreateTripPage> {
     }
   }
 
-  void _clearRoute() {
-    setState(() {
-      _mapController
-          .removeLastRoad(); // Replace clearAllRoadManager with removeLastRoad
-      _startLocation = null;
-      _endLocation = null;
-    });
-  }
-
   // Add this method to show error messages
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

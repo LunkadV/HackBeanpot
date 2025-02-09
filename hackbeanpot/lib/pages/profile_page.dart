@@ -30,15 +30,28 @@ class _ProfilePageState extends State<ProfilePage> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        if (isBanner) {
-          _bannerImageFile = File(pickedFile.path);
-          _bannerImage = pickedFile.path;
-        } else {
-          _profileImageFile = File(pickedFile.path);
-          _profileImage = pickedFile.path;
-        }
-      });
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: isBanner
+            ? CropAspectRatio(ratioX: 2, ratioY: 1)
+            : CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressQuality: 100,
+        maxWidth: isBanner ? 800 : 400,
+        maxHeight: isBanner ? 400 : 400,
+        cropStyle: isBanner ? CropStyle.rectangle : CropStyle.circle,
+      );
+
+      if (croppedFile != null) {
+        setState(() {
+          if (isBanner) {
+            _bannerImageFile = File(croppedFile.path);
+            _bannerImage = croppedFile.path;
+          } else {
+            _profileImageFile = File(croppedFile.path);
+            _profileImage = croppedFile.path;
+          }
+        });
+      }
     }
   }
 
@@ -50,27 +63,80 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             children: [
               Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomLeft,
                 children: [
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(_bannerImage),
-                        fit: BoxFit.cover,
+                  // Banner Image
+                  GestureDetector(
+                    onTap: () => _pickImage(true),
+                    child: Container(
+                      height: 150, // Reduced height for banner
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: _bannerImageFile != null
+                              ? FileImage(_bannerImageFile!) as ImageProvider
+                              : NetworkImage(_bannerImage),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.2),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: Colors.white.withOpacity(0.8),
+                          size: 32,
+                        ),
                       ),
                     ),
                   ),
+                  // Profile Picture
                   Positioned(
-                    bottom: -50,
-                    left: MediaQuery.of(context).size.width / 2 - 50,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(_profileImage),
+                    bottom: -40,
+                    left: 16, // Aligned to the left like Twitter
+                    child: GestureDetector(
+                      onTap: () => _pickImage(false),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 4,
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 45, // Slightly smaller profile picture
+                              backgroundImage: _profileImageFile != null
+                                  ? FileImage(_profileImageFile!)
+                                      as ImageProvider
+                                  : NetworkImage(_profileImage),
+                              backgroundColor: Colors.grey[200],
+                            ),
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white.withOpacity(0.8),
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 60),
+              const SizedBox(
+                  height: 48), // Adjusted spacing for profile content
               const Text(
                 'Freaky Pai',
                 style: TextStyle(
