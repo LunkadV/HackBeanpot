@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
 const TripSchema = new mongoose.Schema({
-    destination: { type: String, required: true, index: true },
-    startDate: { type: Date, required: true, index: true },
-    endDate: { type: Date, required: true },
-    tripType: { type: String, enum: ["Beach", "Mountain", "City", "Nature"], required: true },
-    createdAt: { type: Date, default: Date.now, index: true },
+    id: { type: String, required: true, unique: true },
+    tripName: { type: String, required: true },
+    date: { type: String, required: true },
+    distance: { type: String, required: true },
+    stops: { type: String, required: true },
+    heroTag: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
 });
-
-TripSchema.index({ destination: 1, startDate: 1 }); // Optimize queries for trip searches
 
 module.exports = mongoose.model("Trip", TripSchema);
