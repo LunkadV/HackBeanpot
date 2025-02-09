@@ -1,8 +1,33 @@
-// profile_page.dart
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String _bannerImage =
+      'https://via.placeholder.com/600x200?text=Mountains'; // Placeholder banner image
+  String _profileImage =
+      'https://via.placeholder.com/150'; // Placeholder profile image
+
+  Future<void> _pickImage(bool isBanner) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        if (isBanner) {
+          _bannerImage = pickedFile.path;
+        } else {
+          _profileImage = pickedFile.path;
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,42 +36,50 @@ class ProfilePage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    const CircleAvatar(
+              Stack(
+                children: [
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(_bannerImage),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -50,
+                    left: MediaQuery.of(context).size.width / 2 - 50,
+                    child: CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.orange,
-                      child: Icon(Icons.person, size: 50, color: Colors.white),
+                      backgroundImage: NetworkImage(_profileImage),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Freaky Pai',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Adventure Enthusiast',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStatColumn('12', 'Trips'),
-                        _buildStatColumn('48', 'Places'),
-                        _buildStatColumn('2.4k', 'Photos'),
-                      ],
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 60),
+              const Text(
+                'Freaky Pai',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              Text(
+                'Adventure Enthusiast',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildStatColumn('12', 'Trips'),
+                  _buildStatColumn('48', 'Places'),
+                  _buildStatColumn('2.4k', 'Photos'),
+                ],
               ),
               const SizedBox(height: 12),
               _buildBadgesSection(),
@@ -141,6 +174,16 @@ class ProfilePage extends StatelessWidget {
             icon: Icons.settings,
             title: 'Settings',
             onTap: () {},
+          ),
+          _buildSettingsTile(
+            icon: Icons.photo,
+            title: 'Change Banner',
+            onTap: () => _pickImage(true),
+          ),
+          _buildSettingsTile(
+            icon: Icons.person,
+            title: 'Change Profile Picture',
+            onTap: () => _pickImage(false),
           ),
           _buildSettingsTile(
             icon: Icons.bookmark_border,
