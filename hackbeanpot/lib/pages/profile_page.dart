@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -13,49 +14,29 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   File? _bannerImageFile;
   File? _profileImageFile;
+  File? _bannerImageFile;
+  File? _profileImageFile;
+
+  final List<Map<String, dynamic>> trophies = [
+    {'icon': Icons.flash_on, 'name': 'Quick Start'},
+    {'icon': Icons.emoji_events, 'name': 'Champion'},
+    {'icon': Icons.wine_bar, 'name': 'Elite'},
+    {'icon': Icons.two_k, 'name': 'Level 24'},
+    {'icon': Icons.ac_unit, 'name': 'Winter'},
+  ];
 
   Future<void> _pickImage(bool isBanner) async {
-    try {
-      final picker = ImagePicker();
-      final XFile? pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: isBanner ? 1920 : 800,
-        maxHeight: isBanner ? 1080 : 800,
-      );
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-      if (pickedFile != null) {
-        final croppedFile = await ImageCropper().cropImage(
-          sourcePath: pickedFile.path,
-          aspectRatioPresets: isBanner
-              ? [CropAspectRatioPreset.ratio16x9]
-              : [CropAspectRatioPreset.square],
-          androidUiSettings: AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: Colors.blue,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: isBanner
-                ? CropAspectRatioPreset.ratio16x9
-                : CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          iosUiSettings: IOSUiSettings(
-            title: 'Crop Image',
-            aspectRatioLockEnabled: true,
-            aspectRatioPickerButtonHidden: true,
-          ),
-        );
-        if (croppedFile != null) {
-          setState(() {
-            if (isBanner) {
-              _bannerImageFile = File(croppedFile.path);
-            } else {
-              _profileImageFile = File(croppedFile.path);
-            }
-          });
+    if (pickedFile != null) {
+      setState(() {
+        if (isBanner) {
+          _bannerImage = pickedFile.path;
+        } else {
+          _profileImage = pickedFile.path;
         }
-      }
-    } catch (e) {
-      print('Error picking image: $e');
+      });
     }
   }
 
@@ -67,15 +48,12 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             children: [
               Stack(
-                clipBehavior: Clip.none,
                 children: [
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: _bannerImageFile != null
-                            ? FileImage(_bannerImageFile!) as ImageProvider
-                            : const AssetImage('lib/images/banner_img.jpg'),
+                        image: NetworkImage(_bannerImage),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -83,25 +61,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Positioned(
                     bottom: -50,
                     left: MediaQuery.of(context).size.width / 2 - 50,
-                    child: GestureDetector(
-                      onTap: () => _pickImage(false),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profileImageFile != null
-                            ? FileImage(_profileImageFile!) as ImageProvider
-                            : const AssetImage('lib/images/profile.jpg'),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => _pickImage(true),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(_profileImage),
                     ),
                   ),
                 ],
@@ -211,59 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSettingsSection() {
-    return Container(
-      color: Colors.white,
-      child: Column(
-        children: [
-          _buildSettingsTile(
-            icon: Icons.settings,
-            title: 'Settings',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.photo,
-            title: 'Change Banner',
-            onTap: () => _pickImage(true),
-          ),
-          _buildSettingsTile(
-            icon: Icons.person,
-            title: 'Change Profile Picture',
-            onTap: () => _pickImage(false),
-          ),
-          _buildSettingsTile(
-            icon: Icons.bookmark_border,
-            title: 'Saved Places',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.notifications_none,
-            title: 'Notifications',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help Center',
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey[800]),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }
