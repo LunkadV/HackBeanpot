@@ -3,6 +3,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url "https://maven.spotify.com/repository/public" }
     }
 
     dependencies {
@@ -16,17 +18,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://api.mapbox.com/downloads/v2/releases/maven'
-            authentication {
-                basic(BasicAuthentication)
-            }
-            credentials {
-                username = "mapbox"
-                // Try this more direct approach
-                password = "sk.eyJ1IjoibHVua2FkdiIsImEiOiJjbTZ4MThmMmIwb3YyMmtwdG5odGNqdHJqIn0.z0AYYKPkzcd_xMAjGmNbiA"
-            }
-        }
+        maven { url "https://maven.spotify.com/repository/public" }
     }
 }
 

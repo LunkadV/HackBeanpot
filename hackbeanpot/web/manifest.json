@@ -8,6 +8,10 @@
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "permissions": [
+        "https://accounts.spotify.com/*",
+        "https://api.spotify.com/*"
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",

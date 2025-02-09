@@ -31,6 +31,17 @@
 
   <title>hackbeanpot</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Add this meta tag for Spotify authentication -->
+  <meta name="spotify-domain-verification" content="your-verification-code">
+  
+  <!-- Add this script for handling Spotify auth callback -->
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      window.Spotify = Spotify;
+    };
+  </script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

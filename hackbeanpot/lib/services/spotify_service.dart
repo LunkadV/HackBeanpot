@@ -1,5 +1,8 @@
 import 'package:spotify_sdk/spotify_sdk.dart';
+import 'dart:io' show Platform;
 import '../config/spotify_credentials.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
 
 class SpotifyService {
   static final SpotifyService _instance = SpotifyService._internal();
@@ -8,12 +11,31 @@ class SpotifyService {
 
   Future<bool> connectToSpotify() async {
     try {
-      final result = await SpotifySdk.connectToSpotifyRemote(
-        clientId: SpotifyCredentials.clientId,
-        redirectUrl: SpotifyCredentials.redirectUri,
-        scope: SpotifyCredentials.scope,
-      );
-      return result;
+      if (kIsWeb) {
+        // Web-specific authentication
+        final authUrl =
+            Uri.https(SpotifyCredentials.webAuthDomain, '/authorize', {
+          'client_id': SpotifyCredentials.clientId,
+          'response_type': 'token',
+          'redirect_uri': SpotifyCredentials.redirectUri,
+          'scope': SpotifyCredentials.scope,
+        });
+
+        if (await canLaunchUrl(authUrl)) {
+          await launchUrl(authUrl);
+          return true;
+        } else {
+          throw Exception('Could not launch Spotify auth URL');
+        }
+      } else {
+        // Mobile-specific authentication
+        final result = await SpotifySdk.connectToSpotifyRemote(
+          clientId: SpotifyCredentials.clientId,
+          redirectUrl: SpotifyCredentials.redirectUri,
+          scope: SpotifyCredentials.scope,
+        );
+        return result;
+      }
     } catch (e) {
       print('Spotify connection error: $e');
       return false;
