@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Road Trip Builder",
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }
