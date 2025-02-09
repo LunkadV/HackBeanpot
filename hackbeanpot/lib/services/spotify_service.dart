@@ -2,34 +2,51 @@ import 'package:spotify_sdk/spotify_sdk.dart';
 import '../config/spotify_credentials.dart';
 
 class SpotifyService {
+  static final SpotifyService _instance = SpotifyService._internal();
+  factory SpotifyService() => _instance;
+  SpotifyService._internal();
+
   Future<bool> connectToSpotify() async {
     try {
-      return await SpotifySdk.connectToSpotifyRemote(
+      final result = await SpotifySdk.connectToSpotifyRemote(
         clientId: SpotifyCredentials.clientId,
         redirectUrl: SpotifyCredentials.redirectUri,
+        scope: SpotifyCredentials.scope,
       );
+      return result;
     } catch (e) {
-      print('Failed to connect to Spotify: $e');
+      print('Spotify connection error: $e');
       return false;
     }
   }
 
   Future<void> createLocationBasedPlaylist(
-      String locationName, String type) async {
+      String locationName, String locationType) async {
     if (!await connectToSpotify()) {
       throw Exception('Failed to connect to Spotify');
     }
 
-    // Define genres based on location type
-    Map<String, List<String>> locationGenres = {
-      'city': ['pop', 'rap', 'electronic'],
+    // Map location types to genres
+    final Map<String, List<String>> locationGenres = {
+      'city': ['pop', 'electronic', 'hip-hop'],
       'rural': ['country', 'folk', 'acoustic'],
       'coastal': ['reggae', 'surf rock', 'tropical'],
       'mountain': ['folk', 'indie', 'alternative'],
+      'unknown': ['pop', 'rock', 'indie'],
     };
 
-    // Create and populate playlist based on location type
-    await SpotifySdk.play(spotifyUri: 'spotify:app:playlist:create');
+    final genres = locationGenres[locationType] ?? locationGenres['unknown']!;
+    final playlistName = '$locationName Vibes';
+
+    try {
+      // Launch Spotify app with playlist creation
+      await SpotifySdk.play(
+        spotifyUri: 'spotify:app:playlist:create',
+        asRadio: true,
+      );
+    } catch (e) {
+      throw Exception('Failed to create playlist: $e');
+    }
   }
 
   Future<void> createPersonalizedPlaylist() async {
@@ -37,8 +54,12 @@ class SpotifyService {
       throw Exception('Failed to connect to Spotify');
     }
 
-    await SpotifySdk.play(
-      spotifyUri: 'spotify:app:playlist:create:fromrecommendations',
-    );
+    try {
+      await SpotifySdk.play(
+        spotifyUri: 'spotify:app:playlist:create:fromrecommendations',
+      );
+    } catch (e) {
+      throw Exception('Failed to create personalized playlist: $e');
+    }
   }
 }

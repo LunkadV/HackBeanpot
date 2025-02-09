@@ -1,5 +1,6 @@
 class SpotifyCredentials {
-  static const String clientId = 'YOUR_CLIENT_ID';
-  static const String clientSecret = 'YOUR_CLIENT_SECRET';
-  static const String redirectUri = 'your-app-scheme://callback';
+  static const String clientId = '3ac687ca3ad84d9e80501d33eda67579';
+  static const String redirectUri = 'hackbeanpot://callback';
+  static const String scope =
+      'playlist-modify-public,playlist-modify-private,user-library-read,user-top-read';
 }

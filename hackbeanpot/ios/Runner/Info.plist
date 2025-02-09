@@ -57,5 +57,18 @@
 	<string>We need access to camera to update profile and banner images</string>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+	    <dict>
+	        <key>CFBundleURLSchemes</key>
+	        <array>
+	            <string>hackbeanpot</string>
+	        </array>
+	    </dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	    <string>spotify</string>
+	</array>
 </dict>
 </plist>
