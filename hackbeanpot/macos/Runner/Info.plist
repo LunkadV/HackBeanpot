@@ -28,5 +28,17 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select profile and banner images.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take profile and banner pictures.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to show nearby places.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location to show nearby places.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need your location to show nearby places.</string>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>
