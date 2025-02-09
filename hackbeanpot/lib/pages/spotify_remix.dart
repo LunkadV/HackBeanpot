@@ -1,44 +1,52 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:hackbeanpot/models/trip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/spotify_service.dart';
 
-class RoadtripRemixPage extends StatelessWidget {
-  // Add Spotify API integration
-  final _spotifyApi = SpotifyApi();
+class RoadtripRemixPage extends StatefulWidget {
+  const RoadtripRemixPage({Key? key}) : super(key: key);
 
-  Future<void> _createCustomPlaylist(BuildContext context) async {
+  @override
+  State<RoadtripRemixPage> createState() => _RoadtripRemixPageState();
+}
+
+class _RoadtripRemixPageState extends State<RoadtripRemixPage> {
+  final SpotifyService _spotifyService = SpotifyService();
+  bool _isLoading = false;
+  String _currentLocationType = 'unknown';
+
+  @override
+  void initState() {
+    super.initState();
+    _determineLocation();
+  }
+
+  Future<void> _determineLocation() async {
+    setState(() => _isLoading = true);
     try {
-      // Get current user's trips from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final tripsString = prefs.getString('trips');
-      if (tripsString != null) {
-        final List<dynamic> tripsJson = jsonDecode(tripsString);
-        final trips = tripsJson.map((json) => Trip.fromJson(json)).toList();
+      Position position = await Geolocator.getCurrentPosition();
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-        if (trips.isNotEmpty) {
-          // Get most recent trip
-          final latestTrip = trips.last;
-
-          // Generate playlist based on trip destination
-          final playlist = await _spotifyApi.createPlaylist(
-            name: '${latestTrip.endLocation} Trip Mix',
-            description:
-                'Custom playlist for your trip to ${latestTrip.endLocation}',
-            // Add relevant genres/mood based on trip type
-            seeds: ['road_trip', 'travel'],
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Playlist created successfully!')),
-          );
+      if (placemarks.isNotEmpty) {
+        // Simple logic to determine location type
+        final placemark = placemarks.first;
+        if (placemark.locality?.isNotEmpty ?? false) {
+          _currentLocationType = 'city';
+        } else if (placemark.administrativeArea?.isNotEmpty ?? false) {
+          _currentLocationType = 'rural';
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error creating playlist')),
-      );
+      print('Error getting location: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -47,55 +55,133 @@ class RoadtripRemixPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Roadtrip Remix'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () => _createCustomPlaylist(context),
-              child: const Text('Get Custom Playlist'),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue.shade50,
+                    Colors.white,
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildPlaylistOption(
+                        icon: Icons.location_on,
+                        title: 'Location-Based Mix',
+                        subtitle:
+                            'Create a playlist based on your surroundings',
+                        onTap: () async {
+                          try {
+                            await _spotifyService.createLocationBasedPlaylist(
+                              'Current Location',
+                              _currentLocationType,
+                            );
+                            _showSuccessMessage(
+                                'Location-based playlist created!');
+                          } catch (e) {
+                            _showErrorMessage(e.toString());
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      _buildPlaylistOption(
+                        icon: Icons.person,
+                        title: 'Personalized Mix',
+                        subtitle: 'Create a playlist based on your music taste',
+                        onTap: () async {
+                          try {
+                            await _spotifyService.createPersonalizedPlaylist();
+                            _showSuccessMessage(
+                                'Personalized playlist created!');
+                          } catch (e) {
+                            _showErrorMessage(e.toString());
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                // Create personalized playlist with user preferences
-                try {
-                  await _spotifyApi.createPersonalizedPlaylist(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Personalized playlist created!')),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Error creating playlist')),
-                  );
-                }
-              },
-              child: const Text('Get Custom Personalized Playlist'),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildPlaylistOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 40, color: Colors.blue),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios),
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class SpotifyApi {
-  Future<void> createPlaylist({
-    required String name,
-    required String description,
-    required List<String> seeds,
-  }) async {
-    // Implement Spotify API calls here
-    // 1. Authenticate with Spotify
-    // 2. Create a new playlist
-    // 3. Add tracks based on seeds (genre, mood, etc.)
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
-  Future<void> createPersonalizedPlaylist(BuildContext context) async {
-    // Create playlist with user's Spotify preferences
-    // 1. Get user's top tracks/artists
-    // 2. Create playlist with similar music
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

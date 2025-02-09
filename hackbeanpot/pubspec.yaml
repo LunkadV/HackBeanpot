@@ -12,7 +12,7 @@ dependencies:
   http: ^0.13.5
   image_picker: ^1.0.7
   image_cropper: ^1.4.0
-  geolocator: ^9.0.2
+  geolocator: ^10.1.0
   cupertino_icons: ^1.0.8
   firebase_core: ^3.11.0
   firebase_auth: ^5.4.2
@@ -24,8 +24,9 @@ dependencies:
   flutter_osm_plugin: ^1.3.6
   flutter_map: ^4.0.0
   shared_preferences: ^2.2.2
-  spotify_sdk: ^latest_version
-  spotify: ^latest_version
+  spotify_sdk: ^3.0.0-dev.2
+  spotify: ^0.11.0
+  geocoding: ^2.1.1
 
 dev_dependencies:
   flutter_test:
