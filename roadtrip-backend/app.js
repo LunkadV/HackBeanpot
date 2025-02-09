@@ -1,5 +1,3 @@
-// app.js
-
 // Import required modules
 const express = require("express");
 const cors = require("cors");
@@ -17,21 +15,30 @@ app.get("/", (req, res) => {
     res.send("Welcome to the Road Trip Backend!");
 });
 
-// POST route for building a road trip
+// POST route for building a road trip with multiple stops
 app.post("/roadtrip", (req, res) => {
-    // Extract the start and end locations from the request body
-    const { start, end } = req.body;
+    // Extract start, end, and waypoints from the request body
+    const { start, end, waypoints } = req.body;
 
-    // If either start or end is missing, return a 400 error
+    // Validate inputs
     if (!start || !end) {
         return res.status(400).json({ error: "Start and end locations are required." });
     }
+    if (waypoints && !Array.isArray(waypoints)) {
+        return res.status(400).json({ error: "Waypoints must be an array." });
+    }
 
-    // Create a dummy road trip response
+    // Construct a dummy road trip response
+    let routeDescription = `Your road trip starts at ${start} and ends at ${end}.`;
+    if (waypoints && waypoints.length > 0) {
+        routeDescription += " Stops include: " + waypoints.join(", ") + ".";
+    }
+
     const roadTrip = {
         start: start,
         end: end,
-        route: `Your road trip from ${start} to ${end} is ready! (This is a dummy route.)`
+        waypoints: waypoints || [],
+        route: routeDescription
     };
 
     // Return the dummy road trip as JSON
