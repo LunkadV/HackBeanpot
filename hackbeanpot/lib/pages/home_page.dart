@@ -4,7 +4,6 @@ import 'package:hackbeanpot/models/trip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_details_page.dart';
 import 'profile_page.dart';
-import 'create_trip_page.dart';
 import 'dart:convert';
 
 class HomePage extends StatefulWidget {
@@ -81,8 +80,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: _selectedIndex == 0 ? _buildMainContent() : const ProfilePage(),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          _buildMainContent(),
+          const ProfilePage(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -103,13 +107,17 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMainContent() {
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildSearchBar(),
-          Expanded(child: _buildTripsGrid()),
-        ],
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            _buildSearchBar(),
+            Expanded(
+              child: _buildTripsGrid(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -209,19 +217,22 @@ class _HomePageState extends State<HomePage> {
       itemCount: _trips.length,
       itemBuilder: (context, index) {
         final trip = _trips[index];
+        final heroTag =
+            'trip_${index}_${trip.startLocation}_${trip.endLocation}';
+
         return InkWell(
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => TripDetailsPage(
-                  tripName: '${trip.startLocation} to ${trip.endLocation}',
-                  date:
-                      '${trip.startDate.day}-${trip.endDate.day} ${trip.startDate.month}',
-                  distance: 'N/A',
-                  stops: '2',
-                ),
-              ),
+              '/trip_details',
+              arguments: {
+                'tripName': '${trip.startLocation} to ${trip.endLocation}',
+                'date':
+                    '${trip.startDate.day}-${trip.endDate.day} ${trip.startDate.month}',
+                'distance': '0',
+                'stops': '2',
+                'heroTag': heroTag,
+              },
             );
           },
           child: Container(
@@ -260,14 +271,18 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          trip.endLocation,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        // Add Hero widget here
+                        Hero(
+                          tag: heroTag,
+                          child: Text(
+                            trip.endLocation,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(

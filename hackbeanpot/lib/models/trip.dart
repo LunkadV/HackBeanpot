@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Trip {
   final String startLocation;
   final String endLocation;
@@ -24,10 +22,10 @@ class Trip {
 
   factory Trip.fromJson(Map<String, dynamic> json) {
     return Trip(
-      startLocation: json['startLocation'],
-      endLocation: json['endLocation'],
-      startDate: DateTime.parse(json['startDate']),
-      endDate: DateTime.parse(json['endDate']),
+      startLocation: json['startLocation'] as String,
+      endLocation: json['endLocation'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
     );
   }
 }

@@ -7,7 +7,6 @@ import 'Pages/auth_page.dart';
 import 'firebase_options.dart';
 import 'package:hackbeanpot/pages/spotify_remix.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
