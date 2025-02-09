@@ -1,8 +1,11 @@
 // home_page.dart
 import 'package:flutter/material.dart';
+import 'package:hackbeanpot/models/trip.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_details_page.dart';
 import 'profile_page.dart';
 import 'create_trip_page.dart';
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,29 +15,61 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static const String _storageKey = 'trips';
+  List<Trip> _trips = [];
   int _selectedIndex = 0;
-  final List<String> _regions = [
-    'Asia',
-    'Europe',
-    'South America',
-    'North America'
-  ];
-  String _selectedRegion = 'South America';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTrips();
+  }
+
+  Future<void> _loadTrips() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? tripsJson = prefs.getString(_storageKey);
+
+    if (tripsJson != null) {
+      final List<dynamic> decodedTrips = jsonDecode(tripsJson);
+      setState(() {
+        _trips =
+            decodedTrips.map((tripJson) => Trip.fromJson(tripJson)).toList();
+      });
+    }
+  }
+
+  Future<void> _saveTrips() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String tripsJson = jsonEncode(_trips.map((t) => t.toJson()).toList());
+    await prefs.setString(_storageKey, tripsJson);
+  }
+
+  void _navigateToCreateTrip() async {
+    final result = await Navigator.pushNamed(context, '/create_trip');
+
+    if (result != null && result is Map<String, dynamic>) {
+      final newTrip = Trip(
+        startLocation: result['start'] as String,
+        endLocation: result['end'] as String,
+        startDate: DateTime.now(),
+        endDate: DateTime.now().add(const Duration(days: 7)),
+      );
+
+      setState(() {
+        _trips.add(newTrip);
+      });
+
+      await _saveTrips();
+
+      // Force rebuild to show new trip
+      setState(() {});
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  void _navigateToCreateTrip() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => const CreateTripPage(),
-      ),
-    );
   }
 
   String _getTripImage(int index) {
@@ -73,7 +108,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           _buildHeader(),
           _buildSearchBar(),
-          _buildRegionSelector(),
           Expanded(child: _buildTripsGrid()),
         ],
       ),
@@ -154,56 +188,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRegionSelector() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Select your next trip',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _regions.map((region) {
-                final isSelected = region == _selectedRegion;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedRegion = region),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.black : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      region,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTripsGrid() {
+    if (_trips.isEmpty) {
+      return Center(
+        child: Text(
+          'No trips yet. Create one by tapping the + button!',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -212,18 +206,20 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: 10,
+      itemCount: _trips.length,
       itemBuilder: (context, index) {
+        final trip = _trips[index];
         return InkWell(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => TripDetailsPage(
-                  tripName: 'Rio Adventure',
-                  date: 'Jun 15-17',
-                  distance: '120mi',
-                  stops: '4',
+                  tripName: '${trip.startLocation} to ${trip.endLocation}',
+                  date:
+                      '${trip.startDate.day}-${trip.endDate.day} ${trip.startDate.month}',
+                  distance: 'N/A',
+                  stops: '2',
                 ),
               ),
             );
@@ -255,26 +251,6 @@ class _HomePageState extends State<HomePage> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.favorite_border,
-                              size: 20,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 Expanded(
@@ -285,7 +261,7 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Trip ${index + 1}',
+                          trip.endLocation,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -295,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Jun 15-17',
+                          '${trip.startDate.day}-${trip.endDate.day} ${trip.startDate.month}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
