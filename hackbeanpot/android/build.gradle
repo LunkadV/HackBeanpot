@@ -1,16 +1,39 @@
-allprojects {
+buildscript {
+    ext.kotlin_version = '1.8.22'
     repositories {
         google()
         mavenCentral()
     }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
 }
 
-rootProject.buildDir = "../build"
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://api.mapbox.com/downloads/v2/releases/maven'
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = "mapbox"
+                // Try this more direct approach
+                password = "sk.eyJ1IjoibHVua2FkdiIsImEiOiJjbTZ4MThmMmIwb3YyMmtwdG5odGNqdHJqIn0.z0AYYKPkzcd_xMAjGmNbiA"
+            }
+        }
+    }
+}
+
+rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
+    project.evaluationDependsOn(':app')
 }
 
 tasks.register("clean", Delete) {
