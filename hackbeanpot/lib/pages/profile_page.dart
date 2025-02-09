@@ -14,8 +14,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   File? _bannerImageFile;
   File? _profileImageFile;
-  File? _bannerImageFile;
-  File? _profileImageFile;
+  String _bannerImage = 'https://picsum.photos/800/400'; // Default banner image
+  String _profileImage = 'https://picsum.photos/200'; // Default profile image
 
   final List<Map<String, dynamic>> trophies = [
     {'icon': Icons.flash_on, 'name': 'Quick Start'},
@@ -32,8 +32,10 @@ class _ProfilePageState extends State<ProfilePage> {
     if (pickedFile != null) {
       setState(() {
         if (isBanner) {
+          _bannerImageFile = File(pickedFile.path);
           _bannerImage = pickedFile.path;
         } else {
+          _profileImageFile = File(pickedFile.path);
           _profileImage = pickedFile.path;
         }
       });
@@ -172,6 +174,44 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Settings',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Edit Profile'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Preferences'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.help),
+            title: const Text('Help & Support'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+        ],
       ),
     );
   }
