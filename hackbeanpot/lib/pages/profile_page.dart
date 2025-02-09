@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -9,23 +11,51 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String _bannerImage =
-      'https://via.placeholder.com/600x200?text=Mountains'; // Placeholder banner image
-  String _profileImage =
-      'https://via.placeholder.com/150'; // Placeholder profile image
+  File? _bannerImageFile;
+  File? _profileImageFile;
 
   Future<void> _pickImage(bool isBanner) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: isBanner ? 1920 : 800,
+        maxHeight: isBanner ? 1080 : 800,
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        if (isBanner) {
-          _bannerImage = pickedFile.path;
-        } else {
-          _profileImage = pickedFile.path;
+      if (pickedFile != null) {
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatioPresets: isBanner
+              ? [CropAspectRatioPreset.ratio16x9]
+              : [CropAspectRatioPreset.square],
+          androidUiSettings: AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: isBanner
+                ? CropAspectRatioPreset.ratio16x9
+                : CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          iosUiSettings: IOSUiSettings(
+            title: 'Crop Image',
+            aspectRatioLockEnabled: true,
+            aspectRatioPickerButtonHidden: true,
+          ),
+        );
+        if (croppedFile != null) {
+          setState(() {
+            if (isBanner) {
+              _bannerImageFile = File(croppedFile.path);
+            } else {
+              _profileImageFile = File(croppedFile.path);
+            }
+          });
         }
-      });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
     }
   }
 
@@ -37,12 +67,15 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             children: [
               Stack(
+                clipBehavior: Clip.none,
                 children: [
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(_bannerImage),
+                        image: _bannerImageFile != null
+                            ? FileImage(_bannerImageFile!) as ImageProvider
+                            : const AssetImage('lib/images/banner_img.jpg'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -50,9 +83,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   Positioned(
                     bottom: -50,
                     left: MediaQuery.of(context).size.width / 2 - 50,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(_profileImage),
+                    child: GestureDetector(
+                      onTap: () => _pickImage(false),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: _profileImageFile != null
+                            ? FileImage(_profileImageFile!) as ImageProvider
+                            : const AssetImage('lib/images/profile.jpg'),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => _pickImage(true),
                     ),
                   ),
                 ],
