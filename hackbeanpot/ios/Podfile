@@ -30,10 +30,7 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Add the Google Maps SDK for iOS
-  pod 'GoogleMaps'
-  pod 'Google-Maps-iOS-Utils'
-
+  # Remove Google Maps dependencies since using OpenStreetMap
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths
