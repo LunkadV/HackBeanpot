@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+// create_trip_page.dart
 import 'package:flutter/material.dart';
 
 class CreateTripPage extends StatefulWidget {
@@ -9,202 +9,213 @@ class CreateTripPage extends StatefulWidget {
 }
 
 class _CreateTripPageState extends State<CreateTripPage> {
-  final _tripNameController = TextEditingController();
-  final _startLocationController = TextEditingController();
-  final _endLocationController = TextEditingController();
-  DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 1));
+  final _destinations = ['Rio de Janeiro', 'Paris', 'Tokyo', 'New York'];
+  String? _selectedDestination;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
       appBar: AppBar(
-        backgroundColor: CupertinoColors.systemBackground,
+        backgroundColor: Colors.white,
         elevation: 0,
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(
-            CupertinoIcons.xmark,
-            color: CupertinoColors.activeBlue,
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Create Trip',
+          'Create New Trip',
           style: TextStyle(
-            color: CupertinoColors.black,
-            fontSize: 24,
+            color: Colors.black,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
-          CupertinoButton(
-            child: const Text('Create'),
+          TextButton(
             onPressed: () {
-              // TODO: Implement trip creation
+              // Implement save logic
               Navigator.pop(context);
             },
+            child: const Text(
+              'Create',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Trip Name Field
-              _buildSectionTitle('Trip Name'),
-              CupertinoTextField(
-                controller: _tripNameController,
-                placeholder: 'Enter trip name',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: CupertinoColors.systemGrey4),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('Destination'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  hint: const Text('Select destination'),
+                  value: _selectedDestination,
+                  items: _destinations.map((String destination) {
+                    return DropdownMenuItem<String>(
+                      value: destination,
+                      child: Text(destination),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedDestination = newValue;
+                    });
+                  },
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Locations Section
-              _buildSectionTitle('Locations'),
-              CupertinoTextField(
-                controller: _startLocationController,
-                placeholder: 'Start location',
-                prefix: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(CupertinoIcons.location_solid, size: 20),
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: CupertinoColors.systemGrey4),
-                ),
-              ),
-              const SizedBox(height: 12),
-              CupertinoTextField(
-                controller: _endLocationController,
-                placeholder: 'End location',
-                prefix: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(CupertinoIcons.location_solid, size: 20),
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: CupertinoColors.systemGrey4),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Dates Section
-              _buildSectionTitle('Dates'),
-              GestureDetector(
-                onTap: () => _showDatePicker(context, true),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: CupertinoColors.systemGrey4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Start Date'),
-                      Text(
-                        '${_startDate.month}/${_startDate.day}/${_startDate.year}',
-                        style:
-                            const TextStyle(color: CupertinoColors.activeBlue),
-                      ),
-                    ],
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Dates'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDatePicker(
+                    'Start Date',
+                    _startDate,
+                    (date) => setState(() => _startDate = date),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () => _showDatePicker(context, false),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: CupertinoColors.systemGrey4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('End Date'),
-                      Text(
-                        '${_endDate.month}/${_endDate.day}/${_endDate.year}',
-                        style:
-                            const TextStyle(color: CupertinoColors.activeBlue),
-                      ),
-                    ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildDatePicker(
+                    'End Date',
+                    _endDate,
+                    (date) => setState(() => _endDate = date),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Trip Type'),
+            const SizedBox(height: 8),
+            _buildTripTypeGrid(),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: CupertinoColors.black,
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(
+    String label,
+    DateTime? selectedDate,
+    Function(DateTime?) onSelect,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: selectedDate ?? DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+        );
+        if (picked != null) {
+          onSelect(picked);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              selectedDate != null
+                  ? '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}'
+                  : 'Select date',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _showDatePicker(BuildContext context, bool isStartDate) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 216,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: CupertinoDatePicker(
-            initialDateTime: isStartDate ? _startDate : _endDate,
-            mode: CupertinoDatePickerMode.date,
-            use24hFormat: true,
-            onDateTimeChanged: (DateTime newDate) {
-              setState(() {
-                if (isStartDate) {
-                  _startDate = newDate;
-                } else {
-                  _endDate = newDate;
-                }
-              });
-            },
+  Widget _buildTripTypeGrid() {
+    final tripTypes = [
+      {'icon': Icons.beach_access, 'label': 'Beach'},
+      {'icon': Icons.landscape, 'label': 'Mountain'},
+      {'icon': Icons.location_city, 'label': 'City'},
+      {'icon': Icons.forest, 'label': 'Nature'},
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: tripTypes.length,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-      ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                tripTypes[index]['icon'] as IconData,
+                size: 32,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                tripTypes[index]['label'] as String,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-  }
-
-  @override
-  void dispose() {
-    _tripNameController.dispose();
-    _startLocationController.dispose();
-    _endLocationController.dispose();
-    super.dispose();
   }
 }
