@@ -33,8 +33,8 @@ class _ProfilePageState extends State<ProfilePage> {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: pickedFile.path,
         aspectRatio: isBanner
-            ? CropAspectRatio(ratioX: 2, ratioY: 1)
-            : CropAspectRatio(ratioX: 1, ratioY: 1),
+            ? const CropAspectRatio(ratioX: 2, ratioY: 1)
+            : const CropAspectRatio(ratioX: 1, ratioY: 1),
         compressQuality: 100,
         maxWidth: isBanner ? 800 : 400,
         maxHeight: isBanner ? 400 : 400,
@@ -229,7 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Icon(Icons.star, color: Colors.amber, size: 24),
+            const Icon(Icons.star, color: Colors.amber, size: 24),
             const SizedBox(height: 4),
             Text(
               label,

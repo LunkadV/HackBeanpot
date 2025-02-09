@@ -35,7 +35,7 @@ class _TripDetailsPageState extends State<TripDetailsPage> {
         latitude: 42.3601,
         longitude: -71.0589,
       ),
-      areaLimit: BoundingBox(
+      areaLimit: const BoundingBox(
         north: 85,
         south: -85,
         east: 180,
@@ -110,11 +110,9 @@ class _TripDetailsPageState extends State<TripDetailsPage> {
       );
 
       // Update distance if available
-      if (roadInfo != null) {
-        setState(() {
-          _distance = roadInfo.distance!;
-        });
-      }
+      setState(() {
+        _distance = roadInfo.distance!;
+      });
     } catch (e) {
       print('Error creating route: $e');
     }
@@ -139,18 +137,18 @@ class _TripDetailsPageState extends State<TripDetailsPage> {
                   _calculateDistance();
                 }
               },
-              osmOption: OSMOption(
-                zoomOption: const ZoomOption(
+              osmOption: const OSMOption(
+                zoomOption: ZoomOption(
                   initZoom: 12,
                   minZoomLevel: 4,
                   maxZoomLevel: 18,
                   stepZoom: 1.0,
                 ),
-                userTrackingOption: const UserTrackingOption(
+                userTrackingOption: UserTrackingOption(
                   enableTracking: false,
                   unFollowUser: true,
                 ),
-                roadConfiguration: const RoadOption(
+                roadConfiguration: RoadOption(
                   roadColor: Colors.blue,
                   roadWidth: 5,
                   zoomInto: true,
@@ -163,32 +161,32 @@ class _TripDetailsPageState extends State<TripDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
+                const Text(
                   'Trip Details',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Trip Name: ${widget.tripName}',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Date: ${widget.date}',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Distance: ${_distance.toStringAsFixed(2)} km',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Stops: ${widget.stops}',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               ],
             ),

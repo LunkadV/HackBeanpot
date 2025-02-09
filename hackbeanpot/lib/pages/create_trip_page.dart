@@ -30,7 +30,7 @@ class _CreateTripPageState extends State<CreateTripPage> {
     _mapController = MapController(
       initPosition: GeoPoint(
           latitude: 42.3601, longitude: -71.0589), // Boston coordinates
-      areaLimit: BoundingBox(
+      areaLimit: const BoundingBox(
         north: 85,
         south: -85,
         east: 180,

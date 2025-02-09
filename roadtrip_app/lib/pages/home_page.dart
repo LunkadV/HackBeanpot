@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,9 +66,15 @@ class HomePage extends StatelessWidget {
                               crossAxisCount: 2,
                               childAspectRatio: 1.5,
                               children: [
-                                TripCard(title: 'The Golden Coast', image: 'assets/golden_coast.jpg'),
-                                TripCard(title: 'Colossus', image: 'assets/colossus.jpg'),
-                                TripCard(title: 'City Trek', image: 'assets/city_trek.jpg'),
+                                TripCard(
+                                    title: 'The Golden Coast',
+                                    image: 'assets/golden_coast.jpg'),
+                                TripCard(
+                                    title: 'Colossus',
+                                    image: 'assets/colossus.jpg'),
+                                TripCard(
+                                    title: 'City Trek',
+                                    image: 'assets/city_trek.jpg'),
                               ],
                             ),
                           ),
@@ -88,7 +96,7 @@ class TripCard extends StatelessWidget {
   final String title;
   final String image;
 
-  const TripCard({required this.title, required this.image});
+  const TripCard({super.key, required this.title, required this.image});
 
   @override
   Widget build(BuildContext context) {

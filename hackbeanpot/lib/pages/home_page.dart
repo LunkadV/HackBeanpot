@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         children: [
           _buildMainContent(),
-          RoadtripRemixPage(), // Add the music page
+          const RoadtripRemixPage(), // Add the music page
           const ProfilePage(),
         ],
       ),

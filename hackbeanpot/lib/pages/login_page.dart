@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         // Navigate to home page and remove all previous routes
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
           (route) => false,
         );
       }
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ForgotPasswordPage(),
+                              builder: (context) => const ForgotPasswordPage(),
                             ),
                           );
                         },

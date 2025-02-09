@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/spotify_service.dart';
 
 class RoadtripRemixPage extends StatefulWidget {
-  const RoadtripRemixPage({Key? key}) : super(key: key);
+  const RoadtripRemixPage({super.key});
 
   @override
   State<RoadtripRemixPage> createState() => _RoadtripRemixPageState();

@@ -1,5 +1,4 @@
 import 'package:spotify_sdk/spotify_sdk.dart';
-import 'dart:io' show Platform;
 import '../config/spotify_credentials.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:url_launcher/url_launcher.dart';
